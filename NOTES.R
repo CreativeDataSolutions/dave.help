@@ -9,6 +9,8 @@ cp inst/manual.html index.html
 find . -type f -not -name 'index.html' -not -name '.git' -delete # this deletes the git repo
 
 
+#.gitignore
+
 #build help pages for each package here
 #make UI for unified help pages
 #use bookdown for pages?
