@@ -1,0 +1,1356 @@
+---
+output:
+  html_document:
+    css: C:/Users/dgrapov/Documents/R/win-library/3.4/shinythemes/shinythemes/css/darkly.min.css
+    toc: yes
+    toc_depth: 2
+    toc_float:
+      collapsed: no
+      smooth_scroll: yes
+params:
+  version: 0.1
+  modules: 'Data, Pre-processing, Statistics, Clustering, Dimensional reduction, Pathway analysis, Predictive modeling, Network analysis, Reporting'
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = F, message = F,results='asis')
+```
+
+
+```{r}
+library(dplyr)
+library(shiny)
+library(dave.help)
+mods<-parse_modules(params$modules)
+
+#get theme ... need to do this on machine
+#system.file(package="shinythemes",shinythemes::shinytheme('darkly'))
+
+library(dave.help) #used for html formatting
+htmltools::tagList(rmarkdown::html_dependency_font_awesome()) # required for icons
+
+#custom Css
+includeCSS(system.file('www/css/styles.css',package="dave.help"))
+
+#manual template
+#help_skeleton('DAVEe Cluster',nav='figs/dave.cluster/nav.png')
+```
+
+```{r,results='asis'}
+#hack to open html page to href to be used with
+
+#cant render full html in shiny w/o altering the main app
+
+# #get_help
+# '<script>
+# 
+# function scrollTo(hash) {
+#     location.hash = "#" + hash;
+# }
+# 
+# </script>' %>% cat()
+```
+
+
+`r module_title('DAVe')`
+`r module_title(paste0('Data Analysis and Visualization engine v',params$version),tag=c('b','h3','center'),separator='')`
+
+`r place_fig("figs/dave.main/full.png")`
+
+#### Welcome to DAVe, the application which interactively combines statistics, clustering, data explortaion and visualization with machine learning, functional and network analysis to create information and context rich mapped networks. The following manual describes a selection of available workflows. Please checkout the `Roadmap` section to get a listing of in progress feature development and contact createdatasol@gmail.com with any requests or bug reports. Happy analysis and get ready to connect your data with context.
+
+`r make_alert(message='<h4>This is an experimental alpha release which is being actively developed.</h4>',color='#377eb8')`
+
+<br>
+![](figs/dave.main/nav.png)
+
+
+<hr>
+
+#### DAVe is comprised of `r mods$length` modules covering: `r grammatical_paste(mods$modules) %>% tolower()` domains.
+#### Each module may contain `summary/calculate`, `explore`, `plot` and `report` components.
+### `Summary/Calculate`
+<hr>
+#### This is used to set the calculation options and view the summary or tabular results.
+`r place_fig("figs/dave.model/model/results.png")`
+### `Explore`
+<hr>
+#### Interactively explore the results.
+`r place_fig("figs/dave.main/explore.png")`
+### `Plot`
+<hr>
+#### View and tune your data visualizations.
+`r place_fig("figs/dave.main/plot.png")`
+### `Report`
+<hr>
+#### Create data analysis summaries.
+`r place_fig("figs/dave.main/report.png")`
+
+
+```{r}
+#DAVe Data
+#-------------
+module<-'Data'
+path<-'figs/dave.main/'
+mod_description<-h4('This module is used to overview and manage data and metadata objects.')
+
+link_name<-'dave.data'
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+link_name<-'dave.data.'
+section_links<-create_links(link_name)
+
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+data_description<-'<h4>To get started format your data into two parts as shown below and then follow allong with the instructions in <code>preprocess</code> >> <code>merge</code> to create an analysis ready data object.</h4>'
+
+
+#calculate menue
+#------------------------------
+# section_name<-'.methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(list(text="The data should be formated into two parts 1) the main data containing sample descriptions and numeric variable data and 2) variable meta data.",
+                fig= paste0(path,'data_diagram1.png'),
+                fig_right=FALSE,4),
+              list(text="The main components include the ability to select and view the data.",
+                fig= paste0(path,'select.png'),
+                fig_right=FALSE,4),
+              list(text="Selected data is shown in the overview.",
+                fig= paste0(path,'overview.png'),
+                fig_right=FALSE,4),
+              list(text="Data can be uploaded in the following formats: .csv, project or example.",
+                fig= paste0(path,'load.png'),
+                fig_right=FALSE,4),
+              list(text="Data can be saved as a .csv for download or a project which can be loaded later.",
+                fig= paste0(path,'save.png'),
+                fig_right=FALSE,4),
+              list(text="Deletion of data objects can be done here.",
+                fig= paste0(path,'delete.png'),
+                fig_right=FALSE,4)
+              )
+
+args_data<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods)),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Data management') ,
+       description=data_description,
+       args=args_data))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
+
+```{r}
+#DAVe preprocess
+#-------------
+module<-'Preprocess'
+path<-'figs/dave.preproc/'
+mod_description<-h4('This  module is used to merge, filter and prepare the data for analysis.')
+fig_right<-TRUE
+
+link_name<-'dave.preproc'
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+#main preproc menue
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+#----------
+# Merge
+#----------
+
+#calculate menue
+merge_description<-'<h4><code>Merge</code> is used to identify experimental design factors and merge numeric and variable metadata.</h4>'
+
+link_name<-'dave.preproc.merge.'
+section_links<-create_links(link_name)
+
+# section_name<-'.methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="Select sample meta data (e.g. non-numeric descriptors of the experimental design) which will be added to the <code>_row_meta</code> object and made available to use in visual mapping and analysis/calculation controls.",
+                fig= paste0(path,'data_diagram2.png'),
+                fig_right=fig_right,4),
+              list(text="Identify and row meta data.",
+                fig= paste0(path,'merge_row.png'),
+                fig_right=fig_right,4),
+              list(text="Identify and add column or measurement meta data, wherein ID sets the unique row identifier (e.g. row number).",
+                fig= paste0(path,'merge_var.png'),
+                fig_right=fig_right,4)
+              )
+
+
+#results
+#-------
+# section_name<-'.results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'merge_results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'.plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="Visualize a summary of the merged data.",
+              fig= paste0(path,'overview_merge_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+ 
+# section_name<-'.save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(
+            list(text="Use <code>save</code> to create a data set which will be used for further analyses.",
+              fig= paste0(path,'save.png'),
+              fig_right=fig_right,4))
+
+
+#merge menue
+args_merge<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$report),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      list(section=section_title('Save') ,content=save)),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#filter menue
+#---------------
+filter_description<-'<h4><code>Filter</code> can be used to identify and remove variables with missing values. Specify a factor <code>group</code> of interest and the <code>missing cutoff</code> or percent acceptible missing for each level in the <code>group</code>. It is also useful to remove non-informative varibles or those with a standard deviation of zero (<code>remove zero variance</code>).</h4>' 
+
+link_name<-'dave.preproc.filter.'
+section_links<-create_links(link_name)
+# section_name<-'.methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+
+methods<-list(
+              list(text="Remove error prone variables with too many missing values or zero variance.",
+                fig= paste0(path,'filter.png'),
+                fig_right=fig_right,4),
+              list(text="Identify and row meta data.",
+                fig= paste0(path,'merge_row.png'),
+                fig_right=fig_right,4),
+              list(text="Identify and add column or measurement meta data, wherein ID sets the unique row identifier (e.g. row number).",
+                fig= paste0(path,'merge_var.png'),
+                fig_right=fig_right,4)
+              )
+
+
+#results
+#-------
+# section_name<-'.results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+results<-list(list(text=NULL,#'Overview the filter results.',
+              fig= paste0(path,'filter_results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'.plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+plots<-list(
+            list(text="View missing data for each sample and variable, overall and by class. Missing or zero variables shown in red are arranged based on their sample (row) and variable (column) number.",
+              fig= paste0(path,'summary_ft_plot.png'),
+              fig_right=fig_right,4),
+            list(text="Flagged variables, or those containing greater or equal percent zero or missing values than the <code>missing cutoff</code> are shown in red for each level of a group <code>group</code>.",
+              fig= paste0(path,'overview_ft_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+#create report
+merge_report<-report_collapse(path='C:/Users/dgrapov/Dropbox/Software/dave/dave/dave.help/inst/reports/model_report.html',title='Report',icon="file") %>% as.character() #%>% HTML()
+#add custom message
+icon<-'file'
+title<-'Report'
+message<-paste0('<h4>Click ',
+                tags$label(
+                           HTML(paste0('<i class="fa fa-',icon,'"></i>')), title) %>% as.character(),
+                ' below to collapse the example.</h4>')
+report_alert<-make_alert(message=message,color='#377eb8') %>% as.character()
+merge_report<-paste(report_alert,merge_report,collapse='\n')
+
+#merge menu
+args_filter<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$report),
+      list(section='report',asis=TRUE ,content=merge_report),
+      list(section='link',asis=TRUE ,content=section_links$save)),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Merge') ,
+       description=merge_description,
+       args=args_merge),
+  list(title=submodule_title('Filter'),
+       description=filter_description,
+       args=args_filter))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
+
+```{r}
+#DAVe Statistics
+#-------------
+module<-'Statistics'
+path<-'figs/dave.stat/'
+mod_description<-h4('This module is used to carry out statistical analyses, identify and filter the data based on significant differential expression.')
+
+link_name<-'dave.statistics'
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+link_name<-'dave.statistics.'
+section_links<-create_links(link_name)
+
+KS_description<-'<h4>This is a non-parametric test for differences in means between two groups. This test does not assume variable normality and can be robust to outliers when testing for differences in means between two groups with small samples sizes. This module can also be used to identify differentially expressed variables between groups and create filtered datasets based on the test p-values.</h4>'
+
+#calculate menue
+#------------------------------
+# section_name<-'.methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(list(text="Identify experimental design factor(s) to use for tests and specify variable meta data.",
+                fig= paste0(path,'design.png'),
+                fig_right=FALSE,4),
+              list(text="Select significance level (alpha) to use in visualizations and filter the data.",
+                fig= paste0(path,'filter.png'),
+                fig_right=FALSE,4)
+              )
+
+
+#results
+#-------
+# section_name<-'.results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview methods and statistical analysis results.',
+              fig= paste0(path,'results.png'),
+              fig_right=FALSE,4))
+#plots
+#-----
+# section_name<-'.plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text='Create a volcanoe plot to visualize the relationship between variable fold-changes between groups and test p-values.',
+              fig= paste0(path,'volcanoe.png'),
+              fig_right=FALSE,4),
+            list(text='Identify variables with large fold-changes between groups and low p-values.',
+              fig= paste0(path,'volcanoe_explore.png'),
+              fig_right=FALSE,4),
+            list(text='Select one or many variables to generate violin density plots.',
+              fig= paste0(path,'violin.png'),
+              fig_right=FALSE,4),
+             list(text='Explore variable distributions among groups.',
+              fig= paste0(path,'violin_explore.png'),
+              fig_right=FALSE,4),
+            list(text='Use <code>plot</code> to view many variables and overview the plot style for the <code>report</code>.',
+              fig= paste0(path,'violin_plot.png'),
+              fig_right=FALSE,4)
+            )
+
+
+text<-"Explore variable distributions among groups."
+fig<-"figs/dave.stat/violin_explore.png"
+
+
+# section_name<-'.save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(
+            list(text='Save results and optionally remove non-significant variables by selecting <code>keep selected</code>.',
+              fig= paste0(path,'save.png'),
+              fig_right=FALSE,4))
+
+args_KS<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      list(section=section_title('Save') ,content=save)),
+    collapse='\n<br>\n',section_tags='h3')
+
+#do.call('render_skeleton', args) %>% HTML()
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Kruskall-Wallis (two-class comparison of means)') ,
+       description=KS_description,
+       args=args_KS))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
+
+```{r}
+#DAVe Cluster
+#-------------
+module<-'Cluster'
+path<-'figs/dave.cluster/'
+fig_right<-TRUE
+mod_description<-h4('This module is used to identifiedclusters of related groups of samples and variables.')
+
+link_name<-'dave.cluster'
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+link_name<-'dave.cluster.'
+section_links<-create_links(link_name)
+
+HCA_description<-'<h4>This module is used to carry out hierarchical cluster analysis (HCA) on samples and variables. HCA distance and agglomeration methods can be used to organize the input based on similarity and identify clusters of closely related samples or variables based on the raw data or correlations.</h4>'
+#calculate menue
+#------------------------------
+# section_name<-'.cluster'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+methods<-list(text='Use the <code>nodes</code> menue to specify if samples or variables will be clustered. You can additionally specify <code>names</code> used for labels and <code>annotations</code> used for displaying group metadata.',
+              fig= 'figs/dave.cluster/nodes.png',
+              fig_right=fig_right,4)
+
+methods2<-list(text='The <code>methods</code> menue is used to optionally specify a correlation method, set HCA distance and linkage methods and select the number of clusters.',
+              fig= 'figs/dave.cluster/methods.png',
+              fig_right=fig_right,4)
+
+methods<-list(methods,methods2)
+
+#results
+#-------
+# section_name<-'.results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview methods and clustering results.',
+              fig= 'figs/dave.cluster/results.png',
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'.plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text='Select <code>dendrogram</code> plot type to focus on the relationship between HCA ordering and metadata set in the <code>node</code> >> <code>annotations</code> menue.',
+              fig= 'figs/dave.cluster/dendrogram_explore.png',
+              fig_right=fig_right,4),
+            list(text='Select <code>explore</code> and <code>heatmap</code> plot type to overveiw sample and/or variable similarities and groups.',
+              fig= 'figs/dave.cluster/heatmap_explore.png',
+              fig_right=fig_right,4),
+            list(text='Click and drag the mouse on the heat map to zoom in.',
+              fig= 'figs/dave.cluster/heatmap_explore_zoom.png',
+              fig_right=fig_right,4),
+            list(text='Use <code>plot</code> >> <code>heatmap</code> to visualize heatmap and metadata.',
+              fig= 'figs/dave.cluster/heatmap_plot.png',
+              fig_right=fig_right,4)
+            )
+
+args_HCA<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$results)),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Hierarchical cluster analysis (HCA)') ,
+       description=HCA_description,
+       args=args_HCA))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+#do.call('render_skeleton', args) %>% HTML()
+```
+
+```{r}
+##dave multivariate
+module<-'Multivariate'
+path<-'figs/dave.multivariate/'
+fig_right<-FALSE
+mod_description<-h4('This module supports dimensional reduction and projection pursuits.')
+
+link_name<-'dave.multivariate'
+section_name<-''
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+link_name<-'dave.multivariate.'
+section_links<-create_links(link_name)
+
+
+PCA_description<-'<h4>Principal components analysis (PCA) can be used to summarise the major modes of variance in the data by fewer and uncorrelated principal components (PCs). It is helpful to analyze how sample and variable meta data is related to PCA sample scores and variable loadings.</h4>'
+#calculate menue
+#------------------------------
+
+# section_name<-'.methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(text='Specify the PCA method and normalize the data through centering and scaling.',
+              fig= 'figs/dave.multivariate/calculate.png',
+              fig_right=fig_right,4) %>% list(.)
+
+
+
+#results
+#-------
+# section_name<-'.results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(text='Overview methodsand the variance explained by the PCA model.',
+              fig= 'figs/dave.multivariate/results.png',
+              fig_right=fig_right,4) %>% list(.)
+#plots
+#-----
+# section_name<-'.plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+             list(text='Select from a variety of plot types.',
+              fig= 'figs/dave.multivariate/menue_plot.png',
+              fig_right=fig_right,4),
+            list(text='The <code>screeplot</code> shows the variance explained by each PC. The dashed line marks the 1 % variance limit below which components can be ommited.',
+              fig= 'figs/dave.multivariate/scree_plot.png',
+              fig_right=fig_right,4),
+            list(text='Use <code>cummulative screeplot</code> to view the total % variance explained. The dashed line shows the boundary where 80% of the original variance in the data has been captured by the PCA model.',
+              fig= 'figs/dave.multivariate/cumm_eigen_explore.png',
+              fig_right=fig_right,4),
+            list(text='The <code>diagnostics</code> plot can be used to identify moderate and extreme sample outliers. Large sample <code>leverage</code> denotes a large influence of the samples variance to the identification of the PC components (outliers). The <code>DmodX</code> or highlights moderate multivariate sample differences. Samples showing both high <code>leverage</code> and <code>DmodX</code> shoudl be investigated further.',
+              fig= 'figs/dave.multivariate/diagnostic_plot.png',
+              fig_right=fig_right,4),
+            list(text='Sample <code>scores</code> display multivariate similarities through proximity to other samples in the PCA space.',
+              fig= 'figs/dave.multivariate/scores_plot.png',
+              fig_right=fig_right,4),
+             list(text='The <code>loadings</code> plot displays variable similarities.',
+              fig= 'figs/dave.multivariate/loadings_plot.png',
+              fig_right=fig_right,4),
+            list(text='The plotting menue for <code>scores</code> and <code>loadings</code> can be used to select PCs to view, map meta data to plot colors and group boundaries showing the Hoettlings T2 ellipse and modify plot asthetics.',
+              fig= 'figs/dave.multivariate/scores_plot_menue.png',
+              fig_right=fig_right,4),
+            list(text='The <code>biplot</code> can be used to simultaneously visualize sample scores and loadings over layed on top of each other. Variables with extreme loadings (large positive or negative x/y position) have the largest effects on the sample scores (may correspond to low or high values among samples with similairly extreme scores compared to others).',
+              fig= 'figs/dave.multivariate/biplot_plot.png',
+              fig_right=fig_right,4)
+            )
+
+
+
+args_PCA<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$results)),
+    collapse='\n<br>\n',section_tags='h3')
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Principal Components Analysis (PCA)') ,
+       description=PCA_description,
+       args=args_PCA))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+
+# do.call('render_skeleton', args) %>% HTML()
+```
+
+```{r}
+#DAVe pathway
+#-------------
+module<-'Pathways'
+path<-'figs/dave.pathway/'
+mod_description<-h4('This module is used to test for significant enrichment in biological pathways and visualize the results.')
+fig_right<-TRUE
+
+
+link_name<-'dave.pathway'
+section_name<-''
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+#main preproc menue
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+#----------
+# enrichment
+#----------
+link_name<-'dave.pathway.'
+section_links<-create_links(link_name)
+
+#calculate menue
+mod1_description<-'<h4>Pathway<code>enrichment</code> is calculated using the hypergeometric test. This module uses the <code>KEGG</code> reference organism (ko) database.</h4>'
+
+# section_name<-'methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="Select the name of the column with<code>KEGG</code> id for each variable. Filter which variables will be tested for pathway enrichment based on statistical test <code>p-values</code> and significance <code>cut off</code>.",
+                fig= paste0(path,'enrich_menue.png'),
+                fig_right=fig_right,4),
+              list(text="Filter <code>enrichment</code> results based on the p-value <code>cutoff</code> and false dicovery rate (<code>FDR</code>) adjustment.",
+                fig= paste0(path,'filter_menue.png'),
+                fig_right=fig_right,4)
+              )
+
+
+#results
+#-------
+# section_name<-'results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(
+              list(text=NULL,#'Overview the merge results.',
+                 fig= paste0(path,'enrich_results.png'),
+                  fig_right=fig_right,4),
+              list(text='overview the enrichment test methods and tabular results where: <code>map</code> is the KEGG pathway map id, <code>n_hits</code> is the number of significant variables from this pathway, <code>n_cpd</code> the number of compounds in the pathway and <code>prct</code> is the percent of enriched variables compared to total pathway variables. Selection of interesting pathways to investigate further could involve: 1) verifying that the pathway has a moderate minimum number of variables (e.g. > 10) 2) identifying low <code>p-value</code> and high <code>prct</code> enriched pathways 3) visualizing the network topology of enriched variables in the pathway (e.g. look for metabolic proximity of cha ges which may signify a functional module) . NOTE: Some very large and generic pathways such as <code>Metabolic pathways</code> can take a few minutes to render.',#'Overview the merge results.',
+                fig=NULL,
+                fig_right=fig_right,4)
+              )
+#plots
+#-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="Select pathway name and identify the column to use as the <code>fold-change</code> to view variable changes mapped to the pathway.",
+              fig= paste0(path,'plot_menue.png'),
+              fig_right=fig_right,4),
+            list(text=NULL,
+              fig= paste0(path,'pathway_plot.png'),
+              fig_right=fig_right,4),
+            list(text='The <code>fold-changes</code> normalized to between -1 and 1 are mapped onto pathway entities as described in the color bar in the top right corner.',
+              fig= NULL,
+              fig_right=fig_right,4)
+            )
+
+# 
+# section_name<-'report'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+report<-list(
+            list(text="Select the number of top pathways (based on <code>p-value</code>) to show in table outputs and which <code>pathways</code> to show visualizations of.",
+              fig= paste0(path,'report.png'),
+              fig_right=fig_right,4))
+
+
+#merge menue
+args_enrich<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$report),
+      list(section=section_title('Report') ,content=report)),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Pathway enrichment and visualization') ,
+       description=mod1_description,
+       args=args_enrich))
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
+
+```{r}
+#DAVe modeling
+#-------------
+module<-'Predictive modeling'
+link_name<-'dave.model'
+
+  
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+mod_description<-h4('Create and optimize machine learning models for classification and regression tasks.')
+fig_right<-FALSE
+path<-'figs/dave.model/'
+#main preproc menue
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+#----------
+# Train
+#----------
+path<-'figs/dave.model/model/'
+link_name<-'dave.model.train.'
+section_links<-create_links(link_name)
+
+#calculate menue
+train_description<-'<h4><code>Train</code> is used to fit, optimize and validate models.</h4>'
+
+#methods
+# section_name<-'methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="Selecting the type of model you would like to create <code>classification</code> or <code>regression</code> will toggle the available variables to predict. Use the filter menu <code>selected</code> to specify which variables should be included in the model based on criteria generated in other modules (e.g. statistical and feature selection).",
+                fig= paste0(path,'data_menue.png'),
+                fig_right=fig_right,4),
+              list(text="The <code>model</code> menu is used to specify a single or multiple models to fit to the data. The model hyperparameters can be automatically tuned based on <code>grid size</code> which defines the number or random setting to test. Specific model hyperparameters can be specified using the <code>manual</code> setting. Note when fitting multiple models tuning will be done in the <code>auto</code> mode. The <code>optimize for</code> is used to specify if you want to select the best model based on performance on the <code>training</code> or held out <code>test</code> data (recommended)." ,
+                fig= paste0(path,'model_menue.png'),
+                fig_right=fig_right,4),
+              list(text="This menu is used to specify the <code>training</code> and <code>test</code> data and model cross-validation parameters. Similar to the <code>model>>tune</code> the cross-validation parameters can be <code>manually</code> or <code>automatically</code> set. For example, the selections shown in the example will randomly select 70% of the data (samples) to fit the model which will then be validated on the 305 held out or <code>test</code> data. The model will be internally cross-validated by splitting the <code>training</code> data into <code>7</code> folds and then leaving out each fold during the model fit and then testing the performance on the held-out fold. This process will be repeated <code>3</code> times and the performance on the <code>training</code> data will be summarized over all the results.",
+                fig= paste0(path,'train_menue.png'),
+                fig_right=fig_right,4)
+              )
+
+
+
+#results
+#-------
+# section_name<-'results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="Model performance for the <code>training</code> and <code>test</code> data and training time can be compared.",
+              fig= paste0(path,'perf_plot.png'),
+              fig_right=fig_right,4),
+            list(text="This plot is used to visualize the impact of hyperparameters on model performance.",
+              fig= paste0(path,'model_plot.png'),
+              fig_right=fig_right,4),
+            list(text="Identify the proportion of miss classified samples.",
+              fig= paste0(path,'confusion_plot.png'),
+              fig_right=fig_right,4),
+            list(text="Visualize variable's importance or contribution to the model's performance. Importance for multiple models is calculated based weighted metric of the model’s performance and each variables importance in the model. Importance based on multiple models displays the variables consensus rank (y-axis) across all models and the actual importance in the single highest performing model (x-axis).",
+              fig= paste0(path,'importance_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+
+# section_name<-'save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-NULL #list(section=section_title('Save') ,content=save))
+
+
+#merge menue
+args_train<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+
+#----------
+# feature selection
+#----------
+path<-'figs/dave.model/selection/'
+link_name<-'dave.model.select.'
+fig_right<-TRUE
+section_links<-create_links(link_name)
+
+#calculate menue
+select_description<-'<h4><code>Feature selection</code> is used to identify variables which maximize model performance. Optimal variables are identified using recursive feature elimination wherein many models are built from subsets of variables and an optimal model is identified based on which subset yielded the highest performing model.</h4>'
+
+#<code></code>
+# section_name<-'methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="The <code>data</code> menu is used to specify the model type and select target and predictor variables.",
+                fig= paste0(path,'data_menu.png'),
+                fig_right=fig_right,4),
+              list(text="The <code>optimize</code> menu is used to specify the algorithm used for the selection. The metric specifies which performance criteria will be used to identify the optimal subset of variables." ,
+                fig= paste0(path,'optimize_menu.png'),
+                fig_right=fig_right,4),
+              list(text="The <code>validate</code> menu is used to specify the model cross-validation parameters and size of the automatic hyperparameter tuning grid.",
+                fig= paste0(path,'validate_menu.png'),
+                fig_right=fig_right,4)
+              )
+
+
+
+
+#results
+#-------
+# section_name<-'results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="This visualization displays model performance (y-axis) based on the subset of variables (x-axis). The optimal model is highlighted in red. The plot controls can be used to specify which model metric will be used for the visualization (use <code>calculate</code> to optimized subsets for that metric). The optimal variables can be selected based on the <code>subset function</code>. Options include <code>PickSizeBest</code> which specifies the subset which maximized or minimized the chosen performance metric or <code>PickSizeTolerance</code> which allows for models with less parameters (variables), which are also worse than the optimal model. The accepted decrease in performance is specified as a percent of the metric in <code>tolerance</code>.",
+              fig= paste0(path,'overall_plot.png'),
+              fig_right=fig_right,4),
+            list(text="This visualizations shows the selected variables (red) importance compared to those which were removed (blue).",
+              fig= paste0(path,'importance_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+# section_name<-'save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(list(text=paste0('Add selected features filter to the <code>row_metadata</code> or remove all non-selected variables from the data set <code>keep selected</code>. Common workflows might include <code>feature selection</code> followed by <code>training</code> wherein the <code>rfe_selected</code> filter can be used to select variables in the <code>data >> filter >> selected</code> menu (see',inner_link('dave.model',' here')$ref,' ).'),#'Overview the merge results.',
+              fig= paste0(path,'save.png'),
+              fig_right=fig_right,4))
+save<-list(section=section_title('Save') ,content=save)# list(section=section_title('Save') ,content=save))
+
+
+#merge menue
+args_select<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Train') ,
+       description=train_description,
+       args=args_train),
+  list(title=submodule_title('Feature selection') ,
+       description=select_description,
+       args=args_select)
+  )
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
+
+```{r}
+#DAVe network
+#-------------
+module<-'Network analysis'
+link_name<-'dave.network'
+
+#options
+network_opts<-c('correlation and partial correlation',
+                'biochemical relationships',
+                'structural similarity', 
+                'network mapping and visualization')
+
+section_name<-NULL
+inner_link(paste0(link_name,section_name))$anchor %>% cat()
+
+mod_description<-paste0('Calculate and visualialize complex networks. Use network mapping to integrate your statistical, functional and machine-learning results.Current network options include: ',
+                        grammatical_paste(network_opts),'.') %>%
+  h4()
+fig_right<-FALSE
+path<-'figs/dave.network/'
+
+#main preproc menue
+args_main<-list(title=module,
+    nav=paste0(path,'nav.png'),
+    mod_desc=as.character(mod_description),
+    section=NULL,
+    collapse='\n<br>\n',section_tags='h3')
+
+#----------
+# correlation
+#----------
+path<-'figs/dave.network/corrmap/'
+link_name<-'dave.network.corrmap.'
+section_links<-create_links(link_name)
+
+
+#calculate menue
+corrmap_description<-'<h4>This module is used to calculate and <code>regularized</code> <code>correlation</code> networks.</h4>'
+
+#methods
+# section_name<-'methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="",
+                fig= paste0(path,'corr_methods.png'),
+                fig_right=fig_right,4),
+              list(text="" ,
+                fig= paste0(path,'reg_methods.png'),
+                fig_right=fig_right,4)
+              )
+
+
+
+#results
+#-------
+# section_name<-'results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="",
+              fig= paste0(path,'network_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+
+# section_name<-'save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(
+            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
+              fig= paste0(path,'save.png'),
+              fig_right=fig_right,4)
+            )
+
+#report
+#needs unique id?
+report<-'reports/model_report.html'
+corrmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
+
+#merge menue
+args_corrmap<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$report),
+      list(section='report',asis=TRUE ,content=corrmap_report),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#----------
+# biochemical
+#----------
+fig_right<-TRUE
+path<-'figs/dave.network/keggmap/'
+link_name<-'dave.network.keggmap.'
+section_links<-create_links(link_name)
+
+#calculate menue
+keggmap_description<-'<h4>This module is used to calculate and <code>biochemcial</code> networks. Metabolomic precursor to product relationships are based on <code>KEGG</code> identifiers.</h4>'
+
+#methods
+# section_name<-'methods'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="",
+                fig= paste0(path,'keggmap_methods.png'),
+                fig_right=fig_right,4)
+              )
+
+
+
+#results
+#-------
+# section_name<-'results'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'results.png'),
+              fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+plots<-list(
+            list(text="",
+              fig= paste0(path,'network_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+
+# section_name<-'save'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(
+            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
+              fig= paste0(path,'save.png'),
+              fig_right=fig_right,4)
+            )
+
+#report
+report<-'reports/model_report.html'
+keggmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
+
+#merge menue
+args_keggmap<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='link',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='link',asis=TRUE ,content=section_links$report),
+      list(section='report',asis=TRUE ,content=keggmap_report),
+      list(section='link',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#----------
+# structural
+#----------
+fig_right<-FALSE
+path<-'figs/dave.network/chemmap/'
+link_name<-'dave.network.chemmap.'
+section_links<-create_links(link_name)
+
+#create links
+# create_links<-function(link_name,section_name=c('methods','results','plots','save','report')){
+#   paste0(link_name,section_name) %>%
+#   sapply(.,function(x){inner_link(x)$anchor}) %>%
+#   setNames(.,section_name)
+# }
+
+# section_name<-c('methods','results','plots','save','report')
+# section_links<- paste0(link_name,section_name) %>%
+#   sapply(.,function(x){inner_link(x)$anchor}) %>%
+#   setNames(.,section_name)
+
+#calculate menue
+chemmap_description<-'<h4>This module is used to calculate and <code>structural</code> simialrity networks. Metabolite  <code>structural</code> similarities are calculated based on overlap in Pubchem structural fingerprints defined by  <code>compound identifiers</code> or  <code>CID</code> (see more: https://pubchem.ncbi.nlm.nih.gov/). </h4>'
+
+#methods
+# section_name<-'methods'
+# methods_link<-inner_link(paste0(link_name,section_name))$anchor %>% cat()
+methods<-list(
+              list(text="",
+                fig= paste0(path,'chemmap_methods.png'),
+                fig_right=fig_right,4)
+              )
+
+
+#results
+#-------
+# section_name<-'results'
+# results_link<-inner_link(paste0(link_name,section_name))$anchor %>% cat()
+results<-list(list(text=NULL,#'Overview the merge results.',
+              fig= paste0(path,'results.png'),
+              fig_right=fig_right,4))
+# #plots
+# #-----
+# section_name<-'plots'
+# inner_link(paste0(link_name,section_name))$anchor %>% cat()
+# plots<-list(
+#             list(text="",
+#               fig= paste0(path,'network_plot.png'),
+#               fig_right=fig_right,4)
+#             )
+
+
+# section_name<-'save'
+# save_link<-inner_link(paste0(link_name,section_name))$anchor %>% cat()
+save<-list(
+            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
+              fig= paste0(path,'save.png'),
+              fig_right=fig_right,4)
+            )
+
+#report
+report<-'reports/model_report.html'
+# section_name<-'report'
+# report_link<-inner_link(paste0(link_name,section_name))$anchor
+chemmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
+
+#merge menue
+args_chemmap<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='link',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='methods',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='methods',asis=TRUE ,content=section_links$plots),
+      #list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='methods',asis=TRUE ,content=section_links$report),
+      list(section='report',asis=TRUE ,content=chemmap_report),
+      list(section='methods',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+#----------
+# Visualization and maping
+#----------
+fig_right<-TRUE
+path<-'figs/dave.network/vismap/'
+link_name<-'dave.network.vismap.'
+section_links<-create_links(link_name)
+
+#calculate menue
+vismap_description<-'<h4>This module is used to combine and visualize networks. Network mapping can be used to integrate statistical, functional and predictive modeling results.</h4>'
+
+#methods
+# section_name<-'methods'
+# methods_link<-inner_link(paste0(link_name,section_name))$anchor
+methods<-list(
+              list(text="<code>Select</code> networks to combine and visualize.",
+                fig= paste0(path,'vismap_networks.png'),
+                fig_right=fig_right,4),
+              list(text="Identify network node or vertex attributes.",
+                fig= paste0(path,'nodes_plot_menu.png'),
+                fig_right=fig_right,4),
+              list(text="Specify edge or connection attributes.",
+                fig= paste0(path,'edges_plot_menu.png'),
+                fig_right=fig_right,4)
+              )
+
+
+
+#results
+#-------
+# section_name<-'results'
+# results_link<-inner_link(paste0(link_name,section_name))$anchor
+results<-NULL #list(list(text=NULL,#'Overview the merge results.',
+              # fig= paste0(path,'results.png'),
+              # fig_right=fig_right,4))
+#plots
+#-----
+# section_name<-'plots'
+# plots_link<-inner_link(paste0(link_name,section_name))$anchor
+plots<-list(
+            list(text="",
+              fig= paste0(path,'example1_plot.png'),
+              fig_right=fig_right,4),
+            list(text="",
+              fig= paste0(path,'example2_plot.png'),
+              fig_right=fig_right,4),
+            list(text="",
+              fig= paste0(path,'example3_plot.png'),
+              fig_right=fig_right,4)
+            )
+
+
+# section_name<-'save'
+# save_link<-inner_link(paste0(link_name,section_name))$anchor
+save<-NULL
+
+#report
+report<-'reports/model_report.html'
+# section_name<-'report'
+# report_link<-inner_link(paste0(link_name,section_name))$anchor
+vismap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
+
+#merge menue
+args_vismap<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='methods',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods),
+      list(section='results',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results),
+      list(section='plots',asis=TRUE ,content=section_links$plots),
+      list(section=section_title('Explore and Plot') ,content=plots),
+      list(section='report',asis=TRUE ,content=section_links$report),
+      list(section='report',asis=TRUE ,content=vismap_report),
+      list(section='save',asis=TRUE ,content=section_links$save),
+      save),
+    collapse='\n<br>\n',section_tags='h3')
+
+
+
+#combine all args
+#------------------
+multi_args<-list(
+  list(title=NULL ,
+       description=NULL,
+       args=args_main),
+  list(title=submodule_title('Empirical Networks') ,
+       description=corrmap_description,
+       args=args_corrmap),
+   list(title=submodule_title('Biochemical Networks') ,
+       description=keggmap_description,
+       args=args_keggmap),
+   list(title=submodule_title('Structural Similarity Networks') ,
+       description=chemmap_description,
+       args=args_chemmap),
+   list(title=submodule_title('Network Mapping and visualization') ,
+       description=vismap_description,
+       args=args_vismap)
+  )
+
+out<-lapply(1:length(multi_args),function(i){
+  title<-multi_args[[i]]$title
+  content<-do.call('render_skeleton', multi_args[[i]]$args) 
+  c(title,multi_args[[i]]$description,content)
+}) %>% 
+  unlist() %>%
+  paste0(.,collapse = '\n<br>\n') 
+
+out %>% HTML()
+
+```
