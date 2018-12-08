@@ -17,6 +17,16 @@ knitr::opts_chunk$set(echo = FALSE, warning = F, message = F,results='asis')
 
 
 ```{r}
+#TODO update titles
+#dave.preproc:
+# merge
+# missing
+# normalize - placeholder
+#dave.model:
+# model
+# select
+# interpret - placeholder
+
 library(dplyr)
 library(shiny)
 library(dave.help)
@@ -28,7 +38,7 @@ mods<-parse_modules(params$modules)
 library(dave.help) #used for html formatting
 htmltools::tagList(rmarkdown::html_dependency_font_awesome()) # required for icons
 
-#custom Css
+#custom CSS
 includeCSS(system.file('www/css/styles.css',package="dave.help"))
 
 #manual template

@@ -6,7 +6,8 @@ git checkout -b gh-pages
 #remove all and create index.html
 git checkout gh-pages
 cp inst/manual.html index.html
-find . -type f -not -name 'index.html' -not -name '.git' -delete # this deletes the git repo
+cp -R inst/assets  assets/.
+find . -type f -not -name 'index.html' -not -name '.git' -delete 
 
 
 #.gitignore

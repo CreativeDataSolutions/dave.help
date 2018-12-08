@@ -76,14 +76,14 @@ report_collapse<-function(path,title='Report',icon="file",id=basename(tempfile()
 #' @title
 #' @export
 #' @details used for hacked formating text colors in DT and formattable
-highlight_text <- function(z,highlight='turquoise',text='best'){
+highlight_text <- function(z,highlight='#3399ff',text='best',default='#ffffff00'){
 
   show<-grepl(text,z)
   if(show) {
     color<-highlight
     out<-gsub(text,'',z)
   } else {
-    color<-'#00ffffff'
+    color<-default
     out<-z
   }
 
@@ -134,7 +134,7 @@ inner_link<-function(name='bar',text=NULL){
 #' }
 
 #create alert box
-make_alert<-function(message='Hello world',color='#377eb8'){
+make_alert<-function(message='Hello world',color='#377eb8',remove=TRUE){
   paste0('<div>
     <style>
     .alert {
@@ -159,8 +159,12 @@ make_alert<-function(message='Hello world',color='#377eb8'){
     }
     </style>
 
-    <div class="alert">
-      <span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span>',
+    <div class="alert">',
+      {
+        if(remove){
+          '<span class="closebtn" onclick="this.parentElement.style.display=\'none\';">&times;</span>'
+        } 
+      },
     message,
     '</div>
   </div>') %>% HTML()
