@@ -1,12 +1,14 @@
 ---
+title: DAVe Docs
 output:
   html_document:
-    css: C:/Users/dgrapov/Documents/R/win-library/3.4/shinythemes/shinythemes/css/darkly.min.css
+    #css: !r system.file(package='dave.help','www/css/darkly.min.css') ...missing font deps and not found? 
     toc: yes
     toc_depth: 2
     toc_float:
       collapsed: no
       smooth_scroll: yes
+    theme: darkly
 params:
   version: 0.1
   modules: 'Data, Pre-processing, Statistics, Clustering, Dimensional reduction, Pathway analysis, Predictive modeling, Network analysis, Reporting'
@@ -68,7 +70,7 @@ includeCSS(system.file('www/css/styles.css',package="dave.help"))
 
 #### Welcome to DAVe, the application which interactively combines statistics, clustering, data explortaion and visualization with machine learning, functional and network analysis to create information and context rich mapped networks. The following manual describes a selection of available workflows. Please checkout the `Roadmap` section to get a listing of in progress feature development and contact createdatasol@gmail.com with any requests or bug reports. Happy analysis and get ready to connect your data with context.
 
-`r make_alert(message='<h4>This is an experimental alpha release which is being actively developed.</h4>',color='#377eb8')`
+`r make_alert(message='<h4>This is a beta release which is being actively developed.</h4>',color='#377eb8')`
 
 <br>
 ![](figs/dave.main/nav.png)
@@ -94,6 +96,17 @@ includeCSS(system.file('www/css/styles.css',package="dave.help"))
 <hr>
 #### Create data analysis summaries.
 `r place_fig("figs/dave.main/report.png")`
+
+
+```{r, echo = FALSE, results='asis'}
+html<-system.file('partial/quickstart.html',package='dave.help')
+shiny::HTML(paste(readLines(html),collapse="\n"))
+```
+
+```{r, echo = FALSE, results='asis'}
+html<-system.file('partial/workflows.html',package='dave.help')
+shiny::HTML(paste(readLines(html),collapse="\n"))
+```
 
 
 ```{r}
@@ -307,7 +320,7 @@ plots<-list(
             )
 
 #create report
-merge_report<-report_collapse(path='C:/Users/dgrapov/Dropbox/Software/dave/dave/dave.help/inst/reports/model_report.html',title='Report',icon="file") %>% as.character() #%>% HTML()
+merge_report<-report_collapse(path=system.file(package='dave.help','reports/model_report.html'),title='Report',icon="file") %>% as.character() #%>% HTML()
 #add custom message
 icon<-'file'
 title<-'Report'
@@ -407,7 +420,7 @@ results<-list(list(text=NULL,#'Overview methods and statistical analysis results
 # section_name<-'.plots'
 # inner_link(paste0(link_name,section_name))$anchor %>% cat()
 plots<-list(
-            list(text='Create a volcanoe plot to visualize the relationship between variable fold-changes between groups and test p-values.',
+            list(text='Create a volcano plot to visualize the relationship between variable fold-changes between groups and test p-values.',
               fig= paste0(path,'volcanoe.png'),
               fig_right=FALSE,4),
             list(text='Identify variables with large fold-changes between groups and low p-values.',
@@ -1025,6 +1038,10 @@ args_main<-list(title=module,
     section=NULL,
     collapse='\n<br>\n',section_tags='h3')
 
+#create methods and aresults section for all modules
+#want induvidual reports? init closed
+#global: save,report and plot
+
 #----------
 # correlation
 #----------
@@ -1057,29 +1074,6 @@ methods<-list(
 results<-list(list(text=NULL,#'Overview the merge results.',
               fig= paste0(path,'results.png'),
               fig_right=fig_right,4))
-#plots
-#-----
-# section_name<-'plots'
-# inner_link(paste0(link_name,section_name))$anchor %>% cat()
-plots<-list(
-            list(text="",
-              fig= paste0(path,'network_plot.png'),
-              fig_right=fig_right,4)
-            )
-
-
-# section_name<-'save'
-# inner_link(paste0(link_name,section_name))$anchor %>% cat()
-save<-list(
-            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
-              fig= paste0(path,'save.png'),
-              fig_right=fig_right,4)
-            )
-
-#report
-#needs unique id?
-report<-'reports/model_report.html'
-corrmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
 
 #merge menue
 args_corrmap<-list(title=NULL,
@@ -1089,13 +1083,7 @@ args_corrmap<-list(title=NULL,
       list(section='link',asis=TRUE ,content=section_links$methods),
       list(section=section_title('Methods') ,content=methods),
       list(section='link',asis=TRUE ,content=section_links$results),
-      list(section=section_title('Results') ,content=results),
-      list(section='link',asis=TRUE ,content=section_links$plots),
-      list(section=section_title('Explore and Plot') ,content=plots),
-      list(section='link',asis=TRUE ,content=section_links$report),
-      list(section='report',asis=TRUE ,content=corrmap_report),
-      list(section='link',asis=TRUE ,content=section_links$save),
-      save),
+      list(section=section_title('Results') ,content=results)),
     collapse='\n<br>\n',section_tags='h3')
 
 
@@ -1115,7 +1103,7 @@ keggmap_description<-'<h4>This module is used to calculate and <code>biochemcial
 # inner_link(paste0(link_name,section_name))$anchor %>% cat()
 methods<-list(
               list(text="",
-                fig= paste0(path,'keggmap_methods.png'),
+                fig= paste0(path,'methods.png'),
                 fig_right=fig_right,4)
               )
 
@@ -1128,28 +1116,6 @@ methods<-list(
 results<-list(list(text=NULL,#'Overview the merge results.',
               fig= paste0(path,'results.png'),
               fig_right=fig_right,4))
-#plots
-#-----
-# section_name<-'plots'
-# inner_link(paste0(link_name,section_name))$anchor %>% cat()
-plots<-list(
-            list(text="",
-              fig= paste0(path,'network_plot.png'),
-              fig_right=fig_right,4)
-            )
-
-
-# section_name<-'save'
-# inner_link(paste0(link_name,section_name))$anchor %>% cat()
-save<-list(
-            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
-              fig= paste0(path,'save.png'),
-              fig_right=fig_right,4)
-            )
-
-#report
-report<-'reports/model_report.html'
-keggmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
 
 #merge menue
 args_keggmap<-list(title=NULL,
@@ -1159,13 +1125,7 @@ args_keggmap<-list(title=NULL,
       list(section='link',asis=TRUE ,content=section_links$methods),
       list(section=section_title('Methods') ,content=methods),
       list(section='link',asis=TRUE ,content=section_links$results),
-      list(section=section_title('Results') ,content=results),
-      list(section='link',asis=TRUE ,content=section_links$plots),
-      list(section=section_title('Explore and Plot') ,content=plots),
-      list(section='link',asis=TRUE ,content=section_links$report),
-      list(section='report',asis=TRUE ,content=keggmap_report),
-      list(section='link',asis=TRUE ,content=section_links$save),
-      save),
+      list(section=section_title('Results') ,content=results)),
     collapse='\n<br>\n',section_tags='h3')
 
 
@@ -1177,18 +1137,6 @@ path<-'figs/dave.network/chemmap/'
 link_name<-'dave.network.chemmap.'
 section_links<-create_links(link_name)
 
-#create links
-# create_links<-function(link_name,section_name=c('methods','results','plots','save','report')){
-#   paste0(link_name,section_name) %>%
-#   sapply(.,function(x){inner_link(x)$anchor}) %>%
-#   setNames(.,section_name)
-# }
-
-# section_name<-c('methods','results','plots','save','report')
-# section_links<- paste0(link_name,section_name) %>%
-#   sapply(.,function(x){inner_link(x)$anchor}) %>%
-#   setNames(.,section_name)
-
 #calculate menue
 chemmap_description<-'<h4>This module is used to calculate and <code>structural</code> simialrity networks. Metabolite  <code>structural</code> similarities are calculated based on overlap in Pubchem structural fingerprints defined by  <code>compound identifiers</code> or  <code>CID</code> (see more: https://pubchem.ncbi.nlm.nih.gov/). </h4>'
 
@@ -1197,7 +1145,7 @@ chemmap_description<-'<h4>This module is used to calculate and <code>structural<
 # methods_link<-inner_link(paste0(link_name,section_name))$anchor %>% cat()
 methods<-list(
               list(text="",
-                fig= paste0(path,'chemmap_methods.png'),
+                fig= paste0(path,'methods.png'),
                 fig_right=fig_right,4)
               )
 
@@ -1209,30 +1157,6 @@ methods<-list(
 results<-list(list(text=NULL,#'Overview the merge results.',
               fig= paste0(path,'results.png'),
               fig_right=fig_right,4))
-# #plots
-# #-----
-# section_name<-'plots'
-# inner_link(paste0(link_name,section_name))$anchor %>% cat()
-# plots<-list(
-#             list(text="",
-#               fig= paste0(path,'network_plot.png'),
-#               fig_right=fig_right,4)
-#             )
-
-
-# section_name<-'save'
-# save_link<-inner_link(paste0(link_name,section_name))$anchor %>% cat()
-save<-list(
-            list(text="The network can be saved for export and/or later combined with others in the <code>visualization</code> menu.",
-              fig= paste0(path,'save.png'),
-              fig_right=fig_right,4)
-            )
-
-#report
-report<-'reports/model_report.html'
-# section_name<-'report'
-# report_link<-inner_link(paste0(link_name,section_name))$anchor
-chemmap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
 
 #merge menue
 args_chemmap<-list(title=NULL,
@@ -1243,94 +1167,90 @@ args_chemmap<-list(title=NULL,
       list(section=section_title('Methods') ,content=methods),
       list(section='methods',asis=TRUE ,content=section_links$results),
       list(section=section_title('Results') ,content=results),
-      list(section='methods',asis=TRUE ,content=section_links$plots),
-      #list(section=section_title('Explore and Plot') ,content=plots),
-      list(section='methods',asis=TRUE ,content=section_links$report),
-      list(section='report',asis=TRUE ,content=chemmap_report),
-      list(section='methods',asis=TRUE ,content=section_links$save),
-      save),
+      list(section='methods',asis=TRUE ,content=section_links$plots)),
     collapse='\n<br>\n',section_tags='h3')
 
 
 #----------
-# Visualization and maping
+# combine
 #----------
 fig_right<-TRUE
-path<-'figs/dave.network/vismap/'
-link_name<-'dave.network.vismap.'
+path<-'figs/dave.network/enrich/'
+link_name<-'dave.network.enrich' # !TODO update app help
 section_links<-create_links(link_name)
 
 #calculate menue
-vismap_description<-'<h4>This module is used to combine and visualize networks. Network mapping can be used to integrate statistical, functional and predictive modeling results.</h4>'
+enrich_description<-'<h4>This module is used to combine and visualize networks.</h4>'
+ # Network mapping can be used to integrate statistical, functional and predictive modeling results.</h4>
 
-#methods
-# section_name<-'methods'
-# methods_link<-inner_link(paste0(link_name,section_name))$anchor
 methods<-list(
               list(text="<code>Select</code> networks to combine and visualize.",
-                fig= paste0(path,'vismap_networks.png'),
+                fig= paste0(path,'select_methods.png'),
                 fig_right=fig_right,4),
-              list(text="Identify network node or vertex attributes.",
-                fig= paste0(path,'nodes_plot_menu.png'),
-                fig_right=fig_right,4),
-              list(text="Specify edge or connection attributes.",
-                fig= paste0(path,'edges_plot_menu.png'),
-                fig_right=fig_right,4)
-              )
+              list(text="<code>Update</code> network node attributes based on another compatible data set.",
+                fig= paste0(path,'update_methods.png'),
+                fig_right=fig_right,4))
 
 
-
-#results
-#-------
-# section_name<-'results'
-# results_link<-inner_link(paste0(link_name,section_name))$anchor
-results<-NULL #list(list(text=NULL,#'Overview the merge results.',
-              # fig= paste0(path,'results.png'),
-              # fig_right=fig_right,4))
-#plots
-#-----
-# section_name<-'plots'
-# plots_link<-inner_link(paste0(link_name,section_name))$anchor
-plots<-list(
-            list(text="",
-              fig= paste0(path,'example1_plot.png'),
-              fig_right=fig_right,4),
-            list(text="",
-              fig= paste0(path,'example2_plot.png'),
-              fig_right=fig_right,4),
-            list(text="",
-              fig= paste0(path,'example3_plot.png'),
-              fig_right=fig_right,4)
-            )
-
-
-# section_name<-'save'
-# save_link<-inner_link(paste0(link_name,section_name))$anchor
-save<-NULL
-
-#report
-report<-'reports/model_report.html'
-# section_name<-'report'
-# report_link<-inner_link(paste0(link_name,section_name))$anchor
-vismap_report<-report_collapse(path=report,title='Report',icon="file") %>% as.character() #%>% HTML()
+results<-list(list(text= "View combined network summary.",
+                fig= paste0(path,'results.png'),
+                fig_right=fig_right,4))
 
 #merge menue
-args_vismap<-list(title=NULL,
+args_enrich<-list(title=NULL,
     nav=NULL,
     mod_desc=NULL,
     section=list(
       list(section='methods',asis=TRUE ,content=section_links$methods),
       list(section=section_title('Methods') ,content=methods),
-      list(section='results',asis=TRUE ,content=section_links$results),
-      list(section=section_title('Results') ,content=results),
-      list(section='plots',asis=TRUE ,content=section_links$plots),
-      list(section=section_title('Explore and Plot') ,content=plots),
-      list(section='report',asis=TRUE ,content=section_links$report),
-      list(section='report',asis=TRUE ,content=vismap_report),
-      list(section='save',asis=TRUE ,content=section_links$save),
-      save),
+      list(section='link',asis=TRUE ,content=section_links$results),
+      list(section=section_title('Results') ,content=results)),
     collapse='\n<br>\n',section_tags='h3')
 
+#----------
+# visualize
+#----------
+fig_right<-TRUE
+path<-'figs/dave.network/visualize/'
+link_name<-'dave.network.visualize' # !TODO update app help
+section_links<-create_links(link_name)
+
+#calculate menue
+vis_description<-'<h4>Use network mapping to plot and enrich networks.</h4>'
+ # Network mapping can be used to integrate statistical, functional and predictive modeling results.</h4>
+
+methods<-list(
+              list(text="Visualize variable information through annotation of network node properties such as: name, color, size and shape.",
+                fig= paste0(path,'nodes_ui.png')
+                ),
+              list(text="Modify and filter visualization of edges or relationships.",
+                fig= paste0(path,'edges_ui.png'),  
+                fig_right=fig_right,4),
+              list(text="Customize network global properties.",
+                fig= paste0(path,'canvas_ui.png'),  
+                fig_right=fig_right,4),
+              list(text="Visualize and modify plot for the report.",
+                fig= paste0(path,'place_holder.png'),  
+                fig_right=fig_right,4),
+               list(text="Interactive network with zooming and hover.",
+                fig= paste0(path,'place_holder.png'),  
+                fig_right=fig_right,4),
+               list(text="Dynamic network with node manipulation and custom controls.",
+                fig= paste0(path,'place_holder.png'),  
+                fig_right=fig_right,4),
+              list(text="Investigate network topology.",
+                fig= paste0(path,'place_holder.png'),  
+                fig_right=fig_right,4))
+
+
+#merge menue
+args_vis<-list(title=NULL,
+    nav=NULL,
+    mod_desc=NULL,
+    section=list(
+      list(section='methods',asis=TRUE ,content=section_links$methods),
+      list(section=section_title('Methods') ,content=methods)),
+    collapse='\n<br>\n',section_tags='h3')
 
 
 #combine all args
@@ -1339,21 +1259,25 @@ multi_args<-list(
   list(title=NULL ,
        description=NULL,
        args=args_main),
-  list(title=submodule_title('Empirical Networks') ,
+  list(title=submodule_title('Empirical networks') ,
        description=corrmap_description,
        args=args_corrmap),
-   list(title=submodule_title('Biochemical Networks') ,
+   list(title=submodule_title('Biochemical networks') ,
        description=keggmap_description,
        args=args_keggmap),
-   list(title=submodule_title('Structural Similarity Networks') ,
+   list(title=submodule_title('Structural similarity networks') ,
        description=chemmap_description,
        args=args_chemmap),
-   list(title=submodule_title('Network Mapping and visualization') ,
-       description=vismap_description,
-       args=args_vismap)
+   list(title=submodule_title('Enrich networks') ,
+       description=enrich_description,
+       args=args_enrich),
+  list(title=submodule_title('Visualize networks') ,
+       description=vis_description,
+       args=args_vis)
   )
 
 out<-lapply(1:length(multi_args),function(i){
+  print(i)
   title<-multi_args[[i]]$title
   content<-do.call('render_skeleton', multi_args[[i]]$args) 
   c(title,multi_args[[i]]$description,content)

@@ -123,6 +123,7 @@ grammatical_paste<-function(obj,collapse=", "){
 #' @param fig
 #' @param self encode image self-contained
 #' @import markdown
+#' @export 
 place_fig<-function(fig,self=TRUE){
   if(self) {
     paste0('<center><img src="',markdown:::.b64EncodeFile(fig),'"></center>')

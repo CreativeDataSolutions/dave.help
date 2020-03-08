@@ -1,0 +1,150 @@
+
+/* rounded text box */
+/* .txbox{
+    border: 1px solid black;
+    background-color: #3399ff;
+    color: white;
+    box-shadow: 1px 2px 2px black;
+    width: 50%;
+    font-weight: 900;
+    padding-right: 5px;
+    padding-left: 5px;
+    border-radius: 20px;
+  }
+
+ .txbox {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #3399ff;
+  width:300px;
+  position: center;
+}
+  
+ .txbox_blue {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #2a4e8a;
+  width:300px;
+  position: center;
+}
+
+
+.txbox_green {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #2a4e8a; 
+  position: center;
+}
+*/
+
+.txbox_blue {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #3399ff; 
+  position: center;
+}
+
+.txbox_blue {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #2a4e8a;
+  position: center;
+}
+
+.txbox_green {
+  border: 1px solid black;
+  color: white;
+  box-shadow: 1px 2px 2px black;
+  font-weight: 900;
+  padding-right: 5px;
+  padding-left: 5px;
+  border-radius: 20px;
+  display: inline-block;
+  background-color: #3dbc8b; 
+  position: center;
+}
+
+/* styling text circles and centered image with drop shadow */
+.numberCircle {
+    display:inline-block;
+    border-radius:50%;
+    font-family: Calibri,Candara,Segoe,Segoe UI,Optima,Arial,sans-serif;
+    font-size:22.5px;
+    font-weight: bold;
+    color: white;
+    /* line-height:22.5px; */
+    text-align:center;
+    background:#3399ff;
+}
+
+.numberCircle:before,
+.numberCircle:after {
+    content:'\200B';
+    display:inline-block;
+    line-height:0px;
+    padding-top:50%;
+    padding-bottom:50%;
+}
+
+.numberCircle:before {
+    padding-left:4px;
+}
+.numberCircle:after {
+    padding-right:4px;
+}
+
+.bordered{
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  margin: auto;
+  text-align: center;
+  display: block;
+  width: 75%;
+}
+
+#parent {
+    list-style: none;
+    width: 100%;
+    height: 90px;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+#parent > li {
+    display: inline-block;
+    width: 50%;
+    height: 100%;
+    background-color: red;
+}
