@@ -1,9 +1,0 @@
-﻿source,target,description,direction
-1,3,prepare data for analysis,to
-3,2,methods and results,to
-3,4,compare changes in classes,to
-3,5,identify groups of samples and variables,to
-3,6,reduce dimensionality of sample and variable trends,to
-3,7,calculate predictive models and rank features,to
-3,9,use network mapping to visualize sample and variable relationships ,to
-4,8,pathway enrichment and visualization,to
